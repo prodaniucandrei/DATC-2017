@@ -16,6 +16,7 @@ using Microsoft.Owin.Security.OAuth;
 using IrrigationApi.Models;
 using IrrigationApi.Providers;
 using IrrigationApi.Results;
+using IrrigationApi.Service;
 
 namespace IrrigationApi.Controllers
 {
@@ -48,8 +49,30 @@ namespace IrrigationApi.Controllers
                 _userManager = value;
             }
         }
-
         public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route(("Create"))]
+        public async Task<IHttpActionResult> Create(string email, string password)
+        {
+            DAL dal = new DAL();
+            dal.CreateUser(email,password);
+            return Ok("User created");
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("CheckPwd")]
+        public async Task<IHttpActionResult> CheckPwd(UserLogin user)
+        {
+            DAL dal = new DAL();
+            var result = dal.CheckPwd(user.Email, user.Password);
+            if (result == null)
+                return Unauthorized();
+            else
+                return Ok(result);
+        }
 
         // GET api/Account/UserInfo
         [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]

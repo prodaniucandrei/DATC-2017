@@ -24,7 +24,7 @@ namespace IrrigationWorker
         {
             while (true)
             {
-                var result = _service.GetWeatherAsync("20", "45").Result;
+                var result = _service.GetWeatherAsync("45.127443", "21.281306").Result;
                 _dal.SaveWeatherInfo(result);
                 Thread.Sleep(TimeSpan.FromMinutes(30));
             }
