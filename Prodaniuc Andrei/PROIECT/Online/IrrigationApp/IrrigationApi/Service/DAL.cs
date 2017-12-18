@@ -178,6 +178,26 @@ namespace IrrigationApi.Service
             }
         }
 
+        public async Task SetUpUser(string userId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SetUpUser", conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    SqlParameter Id = new SqlParameter("Id", userId);
+                    cmd.Parameters.Add(Id);
+
+                    conn.Open();
+
+                    var result = cmd.ExecuteNonQuery();
+
+                    conn.Close();
+                }
+            }
+        }
+
         public string EncryptPassword(string password)
         {
             SHA1 hash = SHA1.Create();

@@ -63,6 +63,19 @@ namespace IrrigationApi.Controllers
 
         [AllowAnonymous]
         [HttpPost]
+        [Route("SetupUser")]
+        public async Task<IHttpActionResult> SetupUser(string userId)
+        {
+            DAL dal = new DAL();
+            var result = dal.SetUpUser(userId);
+            if (result == null)
+                return BadRequest();
+            else
+                return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
         [Route("CheckPwd")]
         public async Task<IHttpActionResult> CheckPwd(UserLogin user)
         {

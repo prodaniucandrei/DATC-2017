@@ -42,16 +42,23 @@ namespace MyApp
             {
                 _service = new IrrigationService();
                 var result = await _service.GetLogin(username.Text, password.Text);
-                if (result !=null)
+                if (result!=null && !result.IsSetUp)
                 {
                     Intent intent = new Intent(this, typeof(MapActivity));
                     intent.PutExtra("UserId", result.Id);
                     intent.PutExtra("IsSetUp", result.IsSetUp);
                     StartActivity(intent);
                 }
-                else
+                else if(result == null)
                 {
                     Toast.MakeText(this, "Incorrect credentials!", ToastLength.Long).Show();
+                }
+                else if (result.IsSetUp)
+                {
+                    Intent intent = new Intent(this, typeof(MainActivity));
+                    intent.PutExtra("UserId", result.Id);
+                    intent.PutExtra("IsSetUp", result.IsSetUp);
+                    StartActivity(intent);
                 }
             }
             else
