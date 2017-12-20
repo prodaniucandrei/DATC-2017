@@ -17,9 +17,10 @@ namespace MyApp
     [Activity(Label = "LoginActivity", MainLauncher = true, Theme = "@style/MyTheme")]
     public class LoginActivity : Activity
     {
-        private EditText username;
+        private EditText email;
         private EditText password;
         private Button loginBtn;
+        private TextView registerText;
         private IrrigationService _service;
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -28,20 +29,28 @@ namespace MyApp
             // Create your application here
             SetContentView(Resource.Layout.Login);
             loginBtn = FindViewById<Button>(Resource.Id.login);
-            username = FindViewById<EditText>(Resource.Id.username);
-            password = FindViewById<EditText>(Resource.Id.password);
-            username.Text = "aprodaniuc@mail.com";
+            email = FindViewById<EditText>(Resource.Id.loginEmail);
+            password = FindViewById<EditText>(Resource.Id.loginPassword);
+            registerText = FindViewById<TextView>(Resource.Id.loginRegister);
+            email.Text = "aprodaniuc@mail.com";
             password.Text = "123456";
 
+            registerText.Click += RegisterText_Click;
             loginBtn.Click += LoginBtn_Click;
+        }
+
+        private void RegisterText_Click(object sender, EventArgs e)
+        {
+            Intent intent = new Intent(this, typeof(RegisterActivity));
+            StartActivity(intent);
         }
 
         private async void LoginBtn_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(username.Text) && !string.IsNullOrEmpty(password.Text))
+            if (!string.IsNullOrEmpty(email.Text) && !string.IsNullOrEmpty(password.Text))
             {
                 _service = new IrrigationService();
-                var result = await _service.GetLogin(username.Text, password.Text);
+                var result = await _service.GetLogin(email.Text, password.Text);
                 if (result!=null && !result.IsSetUp)
                 {
                     Intent intent = new Intent(this, typeof(MapActivity));

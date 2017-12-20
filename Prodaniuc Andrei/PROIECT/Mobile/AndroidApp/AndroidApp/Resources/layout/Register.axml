@@ -13,30 +13,26 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/loginEmail"
+            android:id="@+id/registerEmail"
             android:hint="Email" />
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/loginPassword"
+            android:id="@+id/registerPassword"
             android:hint="Password"
+            android:inputType="textPassword" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/registerPasswordRetype"
+            android:hint="Retype password"
             android:inputType="textPassword" />
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/login"
-            android:text="Login"
+            android:id="@+id/register"
+            android:text="Register"
             android:background="#219653"
             android:paddingTop="10dp" />
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:gravity="center"
-            android:text="Not registered? Click here!"
-            android:paddingTop="10dp"
-            android:id="@+id/loginRegister"
-            android:selectAllOnFocus="false"
-            android:linksClickable="false"
-            android:autoLink="all" />
     </LinearLayout>
 </LinearLayout>

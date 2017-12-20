@@ -54,8 +54,27 @@ namespace MyApp.Services
             }
         }
 
+        public async Task<bool> CreateUser(string email, string password)
+        {
+            var pwd = EncryptPassword(password);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            var credentials = new UserLogin() { Email = email, Password = pwd };
+            var content = new StringContent(JsonConvert.SerializeObject(credentials), Encoding.UTF8, "application/json");
+            try
+            {
+                var result = await client.PostAsync("api/Account/Create", content);
 
-
+                if (result.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception x)
+            {
+                return false;
+            }
+        }
 
         public string EncryptPassword(string password)
         {

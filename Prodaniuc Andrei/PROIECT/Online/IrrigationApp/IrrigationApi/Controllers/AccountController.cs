@@ -54,10 +54,10 @@ namespace IrrigationApi.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route(("Create"))]
-        public async Task<IHttpActionResult> Create(string email, string password)
+        public async Task<IHttpActionResult> Create(UserLogin user)
         {
             DAL dal = new DAL();
-            dal.CreateUser(email,password);
+            dal.CreateUser(user.Email,user.Password);
             return Ok("User created");
         }
 
