@@ -73,7 +73,7 @@ namespace IrrigationApi.Service
 
                     SqlParameter uemail = new SqlParameter("Email", email);
                     cmd.Parameters.Add(uemail);
-
+                    var epwd = EncryptPassword(pwd);
                     SqlParameter upwdp = new SqlParameter("Pwd", pwd);
                     cmd.Parameters.Add(upwdp);
 
@@ -174,6 +174,38 @@ namespace IrrigationApi.Service
                     var result = cmd.ExecuteNonQuery();
 
                     conn.Close();
+                }
+            }
+        }
+
+        public async Task<List<SensorModel>> GetSensorsForArea(string areaId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand("GetSensorsForArea", conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    SqlParameter uId = new SqlParameter("AreaId", areaId);
+                    cmd.Parameters.Add(uId);
+
+                    conn.Open();
+                    var result = cmd.ExecuteReader();
+                    List<SensorModel> sensors = new List<SensorModel>();
+                    while (result.Read())
+                    {
+                        sensors.Add(new SensorModel()
+                        {
+                            Id = result["Id"].ToString(),
+                            AreaId = result["AreaId"].ToString(),
+                            Lat = double.Parse(result["Lat"].ToString()),
+                            Lng = double.Parse(result["Lng"].ToString()),
+                            IsActive = bool.Parse(result["IsActive"].ToString())
+                        });
+                    }
+
+                    conn.Close();
+                    return sensors;
                 }
             }
         }

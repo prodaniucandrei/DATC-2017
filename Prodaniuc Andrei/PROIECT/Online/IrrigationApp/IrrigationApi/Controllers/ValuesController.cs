@@ -55,6 +55,17 @@ namespace IrrigationApi.Controllers
             var result = dal.GetAreas(userId);
             return result;
         }
+
+
+        [HttpGet]
+        [Route("GetSensors")]
+        public async Task<IEnumerable<SensorModel>> GetSensors(string areaId)
+        {
+            DAL dal = new DAL();
+
+            var result = await dal.GetSensorsForArea(areaId);
+            return result;
+        }
         // POST api/values
         public async void Post([FromBody]string value)
         {

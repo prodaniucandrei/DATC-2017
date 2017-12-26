@@ -81,7 +81,7 @@ namespace IrrigationApi.Controllers
         {
             DAL dal = new DAL();
             var result = dal.CheckPwd(user.Email, user.Password);
-            if (result == null)
+            if (result == null || string.IsNullOrEmpty(result.Id))
                 return Unauthorized();
             else
                 return Ok(result);

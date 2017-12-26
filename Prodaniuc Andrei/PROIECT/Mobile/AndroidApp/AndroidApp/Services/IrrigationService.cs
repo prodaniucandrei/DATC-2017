@@ -33,6 +33,7 @@ namespace MyApp.Services
         public async Task<UserSetUpModel> GetLogin(string username, string password)
         {
             var pwd = EncryptPassword(password);
+            //var pwd = password;
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             var credentials = new UserLogin() { Email = username, Password = pwd };
             var content = new StringContent(JsonConvert.SerializeObject(credentials), Encoding.UTF8, "application/json");
@@ -95,8 +96,8 @@ namespace MyApp.Services
                 {
                     Id = Guid.NewGuid().ToString(),
                     AreaId = areaId,
-                    Lat=sensor.Latitude,
-                    Lng=sensor.Longitude
+                    Lat = sensor.Latitude,
+                    Lng = sensor.Longitude
                 });
             }
             client.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -114,6 +115,71 @@ namespace MyApp.Services
             catch (Exception x)
             {
                 return false;
+            }
+        }
+
+        public async Task<bool> SetupUser(string userId)
+        {
+            var content = new StringContent("", Encoding.UTF8, "application/json");
+            try
+            {
+                var result = await client.PostAsync("api/Account/SetupUser?userId=" + userId, content);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception x)
+            {
+                return false;
+            }
+        }
+
+        public async Task<string> CreateArea(string userId, string name)
+        {
+            var areaId = Guid.NewGuid().ToString();
+            var area = new AreaModel()
+            {
+                Id = areaId,
+                UserId = userId,
+                Name = name
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(area), Encoding.UTF8, "application/json");
+            try
+            {
+                var result = await client.PostAsync("api/Values/AddArea" , content);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    return areaId;
+                }
+                return string.Empty;
+            }
+            catch (Exception x)
+            {
+                return string.Empty;
+            }
+        }
+
+        public async Task<AreaModel> GetAreasForUser(string userId)
+        {
+            try
+            {
+                var result = await client.GetAsync("api/Values/GetAreas?userId=" + userId);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    var str = result.Content.ReadAsStringAsync().Result;
+                    var res = JsonConvert.DeserializeObject<AreaModel>(str);
+                    return res;
+                }
+                return null;
+            }
+            catch (Exception x)
+            {
+                return null;
             }
         }
     }
@@ -137,5 +203,12 @@ namespace MyApp.Services
         public double Lat { get; set; }
         public double Lng { get; set; }
         public bool IsActive { get; set; }
+    }
+
+    public class AreaModel
+    {
+        public string Id { get; set; }
+        public string UserId { get; set; }
+        public string Name { get; set; }
     }
 }

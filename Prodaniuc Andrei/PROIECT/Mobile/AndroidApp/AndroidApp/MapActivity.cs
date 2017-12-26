@@ -17,7 +17,7 @@ using MyApp.Services;
 namespace MyApp
 {
     [Activity(Label = "MapActivity", ParentActivity = typeof(MainActivity))]
-    public class MapActivity :  Activity , IOnMapReadyCallback, IInfoWindowAdapter, IOnInfoWindowClickListener, IOnMapLongClickListener
+    public class MapActivity : Activity, IOnMapReadyCallback, IInfoWindowAdapter, IOnInfoWindowClickListener, IOnMapLongClickListener
     {
         private GoogleMap gmap;
 
@@ -27,6 +27,9 @@ namespace MyApp
         private Button btnSatellite;
         private Button btnTerrain;
         private List<LatLng> Sensors;
+        private string userId;
+        private string areaId;
+        private EditText et;
 
         public void OnMapReady(GoogleMap googleMap)
         {
@@ -104,6 +107,7 @@ namespace MyApp
         {
             base.OnCreate(savedInstanceState);
             // Create your application here
+            userId = Intent.Extras.GetString("UserId");
             var data = Intent.Extras.GetBoolean("IsSetUp");
             if (!data)
             {
@@ -113,8 +117,11 @@ namespace MyApp
             SetContentView(Resource.Layout.Map);
             submitBtn = FindViewById<Button>(Resource.Id.SubmitBtn);
             if (data)
+            {
+                areaId = Intent.Extras.GetString("AreaId");
                 submitBtn.Visibility = ViewStates.Invisible;
 
+            }
             btnNormal = FindViewById<Button>(Resource.Id.btnNormal);
             btnHybrid = FindViewById<Button>(Resource.Id.btnHybrid);
             btnSatellite = FindViewById<Button>(Resource.Id.btnSatellite);
@@ -131,7 +138,15 @@ namespace MyApp
         private async void SubmitBtn_Click(object sender, EventArgs e)
         {
             var service = new IrrigationService();
-            await service.PostSensorsForArea(Sensors, "70498e46-c177-4c10-b69d-74345374e4c4");
+            //create area
+            var _areaId = await service.CreateArea(userId, "AreaName");
+            //add sensors to area
+            if (!string.IsNullOrEmpty(_areaId))
+            {
+                await service.PostSensorsForArea(Sensors, _areaId);
+                //setup user
+                await service.SetupUser(userId);
+            }
         }
 
         #region maptype
