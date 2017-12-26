@@ -1,4 +1,5 @@
-﻿using IrrigationWorker.Services;
+﻿using IrrigationWorker.Models;
+using IrrigationWorker.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static IrrigationWorker.Services.DAL;
 
 namespace IrrigationWorker
 {
@@ -17,7 +19,17 @@ namespace IrrigationWorker
         {
             _service = new GeoService();
             _dal = new DAL();
-            DoWork();
+
+            var result = _dal.GetSensorsForArea().Result;
+
+            List<LatLng> data = new List<LatLng>();
+            foreach(SensorModel sensor in result)
+            {
+                var val = new LatLng() { Latitude = sensor.Lat, Longitude = sensor.Lng};
+                data.Add(val);
+            }
+            _dal.AddData(data);
+            //DoWork();
         }
 
         private static void DoWork()

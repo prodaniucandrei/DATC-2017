@@ -63,6 +63,31 @@ namespace IrrigationApi.Service
             }
         }
 
+        public async Task<string> GetDataForArea(string areaId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand("GetProjection", conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    SqlParameter uId = new SqlParameter("AreaId", areaId);
+                    cmd.Parameters.Add(uId);
+
+                    conn.Open();
+                    var result = cmd.ExecuteReader();
+                    string data = string.Empty;
+                    while (result.Read())
+                    {
+                        data = result["Data"].ToString();
+                    }
+
+                    conn.Close();
+                    return data;
+                }
+            }
+        }
+
         public UserSetUpModel CheckPwd(string email, string pwd)
         {
             using (SqlConnection conn = new SqlConnection(connString))

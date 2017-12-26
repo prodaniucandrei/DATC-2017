@@ -31,20 +31,11 @@ namespace MyApp
         private string areaId;
         private EditText et;
 
-        public void OnMapReady(GoogleMap googleMap)
+        public async void OnMapReady(GoogleMap googleMap)
         {
-            var data = new List<LatLng>()
-            {
-                new LatLng(41.12345, 23.12345),
-                 new LatLng(41.123456, 23.123455),
-                  new LatLng(41.123457, 23.123456),
-                   new LatLng(41.123458, 23.123457),
-                new LatLng(41.12355, 23.12355),
-                new LatLng(41.12375, 23.12365),
-                new LatLng(41.12385, 23.12385),
-                new LatLng(41.12395, 23.12395)
-            };
 
+            IrrigationService srv = new IrrigationService();
+            var data = await srv.GetDataForArea("28df3166-8a6d-41ba-afa7-4161d7318266");
             int[] colors = {
                 Color.Rgb(102, 225, 0), //green
                 Color.Rgb(255, 0, 0)    // red
@@ -146,6 +137,10 @@ namespace MyApp
                 await service.PostSensorsForArea(Sensors, _areaId);
                 //setup user
                 await service.SetupUser(userId);
+
+                var intent = new Intent(this, typeof(MainActivity));
+                intent.PutExtra("UserId", userId);
+                StartActivity(intent);
             }
         }
 

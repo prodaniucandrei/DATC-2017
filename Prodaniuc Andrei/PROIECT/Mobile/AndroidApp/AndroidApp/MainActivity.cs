@@ -38,8 +38,8 @@ namespace MyApp
             SetSupportActionBar(mToolbar);
 
             var mLeftDataSet = new List<string>();
-            mLeftDataSet.Add("Left Item 1");
-            mLeftDataSet.Add("Left Item 2");
+            mLeftDataSet.Add("Heat map");
+            mLeftDataSet.Add("Area");
             var mLeftAdapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, mLeftDataSet);
             mLeftDrawer.Adapter = mLeftAdapter;
 
@@ -75,6 +75,7 @@ namespace MyApp
 
         private void MLeftDrawer_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
+
             Intent intent = new Intent(this, typeof(MapActivity));
             intent.PutExtra("obj", @"{""obj"":""value""}");
             StartActivity(intent);

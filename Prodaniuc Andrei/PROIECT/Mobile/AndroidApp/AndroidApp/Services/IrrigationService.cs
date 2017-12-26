@@ -182,8 +182,39 @@ namespace MyApp.Services
                 return null;
             }
         }
+
+        public async Task<List<LatLng>> GetDataForArea(string areaId)
+        {
+            try
+            {
+                var result = await client.GetAsync("api/Values/GetData?areaId=" + areaId);
+
+                if (result.IsSuccessStatusCode)
+                {
+                    var str = result.Content.ReadAsStringAsync().Result;
+                    var deser = JsonConvert.DeserializeObject<string>(str);
+                    var res = JsonConvert.DeserializeObject<List<Coord>>(deser);
+                    var list = new List<LatLng>();
+                    foreach(var item in res)
+                    {
+                        list.Add(new LatLng(item.Latitude, item.Longitude));
+                    }
+                    return list;
+                }
+                return null;
+            }
+            catch (Exception x)
+            {
+                return null;
+            }
+        }
     }
 
+    public class Coord
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
     public class UserLogin
     {
         public string Email { get; set; }

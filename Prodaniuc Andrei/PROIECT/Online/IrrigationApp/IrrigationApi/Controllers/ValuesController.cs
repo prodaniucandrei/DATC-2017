@@ -18,11 +18,11 @@ namespace IrrigationApi.Controllers
     public class ValuesController : ApiController
     {
         // GET api/values
-        public IEnumerable<string> Get()
-        {
-            Service.DAL DAL = new Service.DAL();
-            return DAL.GetWeatherInfo(); ;
-        }
+        //public IEnumerable<string> Get()
+        //{
+        //    Service.DAL DAL = new Service.DAL();
+        //    return DAL.GetWeatherInfo(); ;
+        //}
 
         [HttpPost]
         [Route("AddSensor")]
@@ -64,6 +64,17 @@ namespace IrrigationApi.Controllers
             DAL dal = new DAL();
 
             var result = await dal.GetSensorsForArea(areaId);
+            return result;
+        }
+
+        [HttpGet]
+        [Route("GetData")]
+        public async Task<string> GetData(string areaId)
+        {
+            DAL dal = new DAL();
+
+            var result = await dal.GetDataForArea(areaId);
+
             return result;
         }
         // POST api/values

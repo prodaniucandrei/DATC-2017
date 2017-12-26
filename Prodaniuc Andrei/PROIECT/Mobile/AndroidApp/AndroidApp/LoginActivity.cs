@@ -30,8 +30,8 @@ namespace MyApp
             // Create your application here
             SetContentView(Resource.Layout.Login);
             Setup();
-            email.Text = "aprodaniuc@mail.com";
-            password.Text = "123456";
+            email.Text = "user3@email.com";
+            password.Text = "1234";
         }
 
         private void Setup()

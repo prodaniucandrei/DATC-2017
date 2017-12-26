@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\LatLng.cs" />
     <Compile Include="Models\WeatherObservation.cs" />
     <Compile Include="Models\WeatherResult.cs" />
     <Compile Include="Program.cs" />
