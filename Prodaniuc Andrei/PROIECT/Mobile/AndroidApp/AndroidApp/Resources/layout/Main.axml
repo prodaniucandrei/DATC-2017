@@ -22,15 +22,32 @@
            android:layout_height="match_parent">
 
     <!--The main content view-->
-    <RelativeLayout
+    <LinearLayout
+      android:orientation="vertical"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
       <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Support v7 action bar drawer toggle"
-        android:layout_centerInParent="true"/>
-    </RelativeLayout>
+              android:id="@+id/areaText"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Area"/>
+      <TextView
+              android:id="@+id/numberOfSensorsText"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Number of sensors"/>
+      <TextView
+              android:id="@+id/activeSensorsText"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Active sensors"/>
+      <TextView
+              android:id="@+id/averageValueText"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Average value"/>
+
+    </LinearLayout>
 
     <!--the left navigation drawer-->
     <ListView

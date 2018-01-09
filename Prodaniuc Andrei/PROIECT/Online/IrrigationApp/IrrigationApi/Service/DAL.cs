@@ -63,7 +63,7 @@ namespace IrrigationApi.Service
             }
         }
 
-        public async Task<string> GetDataForArea(string areaId)
+        public async Task<Projection> GetDataForArea(string areaId)
         {
             using (SqlConnection conn = new SqlConnection(connString))
             {
@@ -77,13 +77,15 @@ namespace IrrigationApi.Service
                     conn.Open();
                     var result = cmd.ExecuteReader();
                     string data = string.Empty;
+                    float average = 0;
                     while (result.Read())
                     {
+                        average = float.Parse(result["Average"].ToString());
                         data = result["Data"].ToString();
                     }
 
                     conn.Close();
-                    return data;
+                    return new Projection() { Average = average, Data = data };
                 }
             }
         }
@@ -225,7 +227,8 @@ namespace IrrigationApi.Service
                             AreaId = result["AreaId"].ToString(),
                             Lat = double.Parse(result["Lat"].ToString()),
                             Lng = double.Parse(result["Lng"].ToString()),
-                            IsActive = bool.Parse(result["IsActive"].ToString())
+                            IsActive = bool.Parse(result["IsActive"].ToString()),
+                            Value = int.Parse(result["Value"].ToString())
                         });
                     }
 

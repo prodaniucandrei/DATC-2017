@@ -13,6 +13,8 @@ using Android.Support.V7.App;
 using Android.Graphics.Drawables;
 using Android.Content;
 using MyApp.Services;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace MyApp
 {
@@ -30,42 +32,47 @@ namespace MyApp
         private string userId;
         private string areaId;
         private EditText et;
+        private bool heatMap;
+        private List<LatLng> data = new List<LatLng>();
 
         public async void OnMapReady(GoogleMap googleMap)
         {
-
             IrrigationService srv = new IrrigationService();
-            var data = await srv.GetDataForArea("28df3166-8a6d-41ba-afa7-4161d7318266");
+            //if (!string.IsNullOrEmpty(areaId))
+            //    data = await srv.GetDataForArea(areaId);
             int[] colors = {
                 Color.Rgb(102, 225, 0), //green
                 Color.Rgb(255, 0, 0)    // red
             };
             float[] startPoints = { 0.2f, 1f };
             var gradient = new Gradient(colors, startPoints);
-
-            var mProvider = new HeatmapTileProvider.Builder().Data(data).Gradient(gradient).Build();
-
-            mProvider.SetOpacity(0.7);
-
-
             gmap = googleMap;
+            if (data.Any())
+            {
+                var mProvider = new HeatmapTileProvider.Builder().Data(data).Gradient(gradient).Build();
+                mProvider.SetOpacity(0.7);
+                gmap.AddTileOverlay(new TileOverlayOptions().InvokeTileProvider(mProvider));
+                gmap.MoveCamera(CameraUpdateFactory.NewLatLngZoom(data.FirstOrDefault(), 9));
+            }
+            else
+            {
+                gmap.MoveCamera(CameraUpdateFactory.NewLatLngZoom(new LatLng(45.780153, 21.172579), 6));
+            }
+           
             gmap.MapLongClick += Gmap_MapLongClick;
-
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.SetPosition(new LatLng(41, 23));
-            markerOptions.SetTitle("My position");
-            markerOptions.SetSnippet("Info");
-            gmap.AddMarker(markerOptions);
-
             gmap.UiSettings.MyLocationButtonEnabled = true;
             gmap.UiSettings.MapToolbarEnabled = true;
             gmap.UiSettings.CompassEnabled = true;
             gmap.UiSettings.RotateGesturesEnabled = true;
-            gmap.MoveCamera(CameraUpdateFactory.NewLatLngZoom(new LatLng(41, 23), 6));
-
+            
             gmap.SetInfoWindowAdapter(this);
             gmap.SetOnInfoWindowClickListener(this);
 
+            /*MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.SetPosition(new LatLng(41, 23));
+            markerOptions.SetTitle("My position");
+            markerOptions.SetSnippet("Info");
+            gmap.AddMarker(markerOptions);
             PolygonOptions rectangle = new PolygonOptions();
             rectangle
                 .Add(new LatLng(41.05, 23))
@@ -78,9 +85,9 @@ namespace MyApp
             gmap.AddCircle(circle);
 
             rectangle.InvokeFillColor(Color.Rgb(184, 26, 141));
-            Polygon polyline = gmap.AddPolygon(rectangle);
+            Polygon polyline = gmap.AddPolygon(rectangle);*/
 
-            gmap.AddTileOverlay(new TileOverlayOptions().InvokeTileProvider(mProvider));
+
         }
 
         private void Gmap_MapLongClick(object sender, MapLongClickEventArgs e)
@@ -94,37 +101,53 @@ namespace MyApp
             gmap.AddMarker(markerOptions);
         }
 
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+            Sensors = new List<LatLng>();
             // Create your application here
             userId = Intent.Extras.GetString("UserId");
-            var data = Intent.Extras.GetBoolean("IsSetUp");
-            if (!data)
+            var userSetup = Intent.Extras.GetBoolean("IsSetUp");
+            if (!userSetup)
             {
                 RequestWindowFeature(WindowFeatures.NoTitle);
             }
-            Sensors = new List<LatLng>();
-            SetContentView(Resource.Layout.Map);
-            submitBtn = FindViewById<Button>(Resource.Id.SubmitBtn);
-            if (data)
-            {
-                areaId = Intent.Extras.GetString("AreaId");
-                submitBtn.Visibility = ViewStates.Invisible;
 
+            SetContentView(Resource.Layout.Map);
+            SetupButtons();
+            if (!userSetup)
+                Toast.MakeText(this, "Please select your pins on the map", ToastLength.Long).Show();
+            if (userSetup)
+            {
+                var proj = JsonConvert.DeserializeObject<Projection>(Intent.Extras.GetString("Projection"));
+                var points = JsonConvert.DeserializeObject<List<Coord>>(proj.Data);
+                foreach(var p in points)
+                {
+                    data.Add(new LatLng(p.Latitude, p.Longitude));
+                }
+                areaId = Intent.Extras.GetString("AreaId");
+                heatMap= Intent.Extras.GetBoolean("Heatmap");
+                submitBtn.Visibility = ViewStates.Invisible;
             }
+
+         
+            SetUpMap();
+        }
+
+        private void SetupButtons()
+        {
             btnNormal = FindViewById<Button>(Resource.Id.btnNormal);
             btnHybrid = FindViewById<Button>(Resource.Id.btnHybrid);
             btnSatellite = FindViewById<Button>(Resource.Id.btnSatellite);
             btnTerrain = FindViewById<Button>(Resource.Id.btnTerrain);
-
+            submitBtn = FindViewById<Button>(Resource.Id.SubmitBtn);
             btnNormal.Click += BtnNormal_Click;
             btnHybrid.Click += BtnHybrid_Click;
             btnSatellite.Click += BtnSatellite_Click;
             btnTerrain.Click += BtnTerrain_Click;
             submitBtn.Click += SubmitBtn_Click;
-            SetUpMap();
         }
+
 
         private async void SubmitBtn_Click(object sender, EventArgs e)
         {
@@ -140,6 +163,7 @@ namespace MyApp
 
                 var intent = new Intent(this, typeof(MainActivity));
                 intent.PutExtra("UserId", userId);
+                intent.PutExtra("IsSetUp", true);
                 StartActivity(intent);
             }
         }

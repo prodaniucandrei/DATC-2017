@@ -172,8 +172,8 @@ namespace MyApp.Services
                 if (result.IsSuccessStatusCode)
                 {
                     var str = result.Content.ReadAsStringAsync().Result;
-                    var res = JsonConvert.DeserializeObject<AreaModel>(str);
-                    return res;
+                    var res = JsonConvert.DeserializeObject<List<AreaModel>>(str);
+                    return res.FirstOrDefault();
                 }
                 return null;
             }
@@ -183,7 +183,7 @@ namespace MyApp.Services
             }
         }
 
-        public async Task<List<LatLng>> GetDataForArea(string areaId)
+        public async Task<Projection> GetDataForArea(string areaId)
         {
             try
             {
@@ -192,14 +192,15 @@ namespace MyApp.Services
                 if (result.IsSuccessStatusCode)
                 {
                     var str = result.Content.ReadAsStringAsync().Result;
-                    var deser = JsonConvert.DeserializeObject<string>(str);
-                    var res = JsonConvert.DeserializeObject<List<Coord>>(deser);
-                    var list = new List<LatLng>();
-                    foreach(var item in res)
-                    {
-                        list.Add(new LatLng(item.Latitude, item.Longitude));
-                    }
-                    return list;
+                    //var deser = JsonConvert.DeserializeObject<string>(str);
+                    var res = JsonConvert.DeserializeObject<Projection>(str);
+                    //var list = new List<LatLng>();
+                    //foreach(var item in res)
+                    //{
+                    //    list.Add(new LatLng(item.Latitude, item.Longitude));
+                    //}
+                    //return list;
+                    return res;
                 }
                 return null;
             }
@@ -234,6 +235,7 @@ namespace MyApp.Services
         public double Lat { get; set; }
         public double Lng { get; set; }
         public bool IsActive { get; set; }
+        public int Value { get; set; }
     }
 
     public class AreaModel

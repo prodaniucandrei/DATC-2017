@@ -12,5 +12,6 @@ namespace IrrigationApi.Models
         public double Lat { get; set; }
         public double Lng { get; set; }
         public bool IsActive { get; set; }
+        public int Value { get; set; }
     }
 }

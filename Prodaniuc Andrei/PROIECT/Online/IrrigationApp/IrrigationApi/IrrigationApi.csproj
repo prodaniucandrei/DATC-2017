@@ -252,6 +252,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AreaModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\Projection.cs" />
     <Compile Include="Models\SensorModel.cs" />
     <Compile Include="Models\UserLogin.cs" />
     <Compile Include="Models\UserSetUpModel.cs" />

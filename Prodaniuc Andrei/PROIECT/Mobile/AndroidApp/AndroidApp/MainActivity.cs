@@ -10,10 +10,12 @@ using Android.Support.V4.Widget;
 using Android.Views;
 using Android;
 using System.Collections.Generic;
+using MyApp.Services;
+using Newtonsoft.Json;
 
 namespace MyApp
 {
-    [Activity(Label = "AndroidApp",  Icon = "@drawable/icon", Theme = "@style/MyTheme")]
+    [Activity(Label = "AndroidApp", Icon = "@drawable/icon", Theme = "@style/MyTheme")]
     public class MainActivity : AppCompatActivity
     {
 
@@ -22,13 +24,17 @@ namespace MyApp
         private DrawerLayout mDrawerLayout;
         private ListView mLeftDrawer;
         private ListView mRightDrawer;
+        private string userId;
+        private bool userSetup;
+        private Projection projection;
 
-        protected override void OnCreate(Bundle bundle)
+        protected async override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
 
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
+           
 
             mToolbar = FindViewById<SupportToolbar>(Resource.Id.toolbar);
             mDrawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
@@ -66,18 +72,43 @@ namespace MyApp
                 {
                     SupportActionBar.SetTitle(Resource.String.closeDrawer);
                 }
+                userId = bundle.GetString("UserId");
+                userSetup = bundle.GetBoolean("IsSetUp");
             }
             else
             {
                 SupportActionBar.SetTitle(Resource.String.closeDrawer);
+                userId = Intent.Extras.GetString("UserId");
+                userSetup = Intent.Extras.GetBoolean("IsSetUp");
             }
+            var service = new IrrigationService();
+            var areaId = (await service.GetAreasForUser(userId)).Id;
+            projection = await service.GetDataForArea(areaId);
+            LoadLabels();
         }
 
-        private void MLeftDrawer_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        private void LoadLabels()
         {
+            TextView areaLabel = FindViewById<TextView>(Resource.Id.areaText);
+            TextView nrSensorsLabel = FindViewById<TextView>(Resource.Id.numberOfSensorsText);
+            TextView activeLabel = FindViewById<TextView>(Resource.Id.activeSensorsText);
+            TextView averageLabel = FindViewById<TextView>(Resource.Id.averageValueText);
 
+            areaLabel.Text = areaLabel.Text + " " + "Timisoara";
+            averageLabel.Text = averageLabel.Text + " " + projection.Average;
+        }
+
+        private async void MLeftDrawer_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        {
             Intent intent = new Intent(this, typeof(MapActivity));
-            intent.PutExtra("obj", @"{""obj"":""value""}");
+            var srv = new IrrigationService();
+            var areaId = (await srv.GetAreasForUser(userId)).Id;
+            intent.PutExtra("Projection", JsonConvert.SerializeObject(projection));
+            intent.PutExtra("AreaId", areaId);
+            var heatMap = e.Position == 0 ? true : false;
+            intent.PutExtra("Heatmap", heatMap);
+            intent.PutExtra("UserId", userId);
+            intent.PutExtra("IsSetUp", userSetup);
             StartActivity(intent);
         }
 
@@ -116,6 +147,9 @@ namespace MyApp
 
         protected override void OnSaveInstanceState(Bundle outState)
         {
+            if (userId != null)
+                outState.PutString("UserId", userId);
+            outState.PutBoolean("IsSetUp", userSetup);
             if (mDrawerLayout.IsDrawerOpen((int)GravityFlags.Left))
             {
                 outState.PutString("DrawerState", "Opened");

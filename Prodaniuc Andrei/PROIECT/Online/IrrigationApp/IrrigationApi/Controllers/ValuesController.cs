@@ -69,7 +69,7 @@ namespace IrrigationApi.Controllers
 
         [HttpGet]
         [Route("GetData")]
-        public async Task<string> GetData(string areaId)
+        public async Task<Projection> GetData(string areaId)
         {
             DAL dal = new DAL();
 

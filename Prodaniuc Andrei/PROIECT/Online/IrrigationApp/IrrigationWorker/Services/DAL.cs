@@ -23,7 +23,7 @@ namespace IrrigationWorker.Services
         #region sql
          private readonly string connString = "Server=tcp:irrigationserver.database.windows.net,1433;Initial Catalog=Irrigation;Persist Security Info=False;User ID=aprodaniuc;Password=P@ssw0rd123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
-        public async Task<List<SensorModel>> GetSensorsForArea(string areaId = "28df3166-8a6d-41ba-afa7-4161d7318266")
+        public async Task<List<SensorModel>> GetSensorsForArea(string areaId)
         {
             using (SqlConnection conn = new SqlConnection(connString))
             {
@@ -45,7 +45,8 @@ namespace IrrigationWorker.Services
                             AreaId = result["AreaId"].ToString(),
                             Lat = double.Parse(result["Lat"].ToString()),
                             Lng = double.Parse(result["Lng"].ToString()),
-                            IsActive = bool.Parse(result["IsActive"].ToString())
+                            IsActive = bool.Parse(result["IsActive"].ToString()),
+                            Value = int.Parse(result["Value"].ToString())
                         });
                     }
 
@@ -55,11 +56,88 @@ namespace IrrigationWorker.Services
             }
         }
 
-        public void AddData(List<LatLng> dataList)
+
+        public async Task<List<string>> GetUsersId()
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand("GetUsersId", conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    conn.Open();
+                    var result = cmd.ExecuteReader();
+                    List<string> usersId= new List<string>();
+                    while (result.Read())
+                    {
+                        usersId.Add(result["Id"].ToString());
+                    }
+
+                    conn.Close();
+                    return usersId;
+                }
+            }
+        }
+
+        public List<AreaModel> GetAreas(string userId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand("GetAreasForUser", conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    System.Data.SqlClient.SqlParameter uId = new System.Data.SqlClient.SqlParameter("UserId", userId);
+                    cmd.Parameters.Add(uId);
+
+                    conn.Open();
+                    var result = cmd.ExecuteReader();
+                    List<AreaModel> areas = new List<AreaModel>();
+                    while (result.Read())
+                    {
+                        areas.Add(new AreaModel()
+                        {
+                            Id = result["Id"].ToString(),
+                            UserId = result["UserId"].ToString(),
+                            Name = result["Name"].ToString()
+                        });
+                    }
+
+                    conn.Close();
+                    return areas;
+                }
+            }
+        }
+
+        public void UpdateSensorsValue(string id, int value)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                using (SqlCommand cmd = new SqlCommand("UpdateSensorValue", conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    System.Data.SqlClient.SqlParameter Id = new System.Data.SqlClient.SqlParameter("Id", id);
+                    cmd.Parameters.Add(Id);
+
+                    System.Data.SqlClient.SqlParameter valueP = new System.Data.SqlClient.SqlParameter("Value", value);
+                    cmd.Parameters.Add(valueP);
+
+                    conn.Open();
+
+                    var result = cmd.ExecuteNonQuery();
+
+                    conn.Close();
+                }
+            }
+        }
+
+
+        public void AddData(List<LatLng> dataList, float average)
         {
             string id = Guid.NewGuid().ToString();
             string areaId = "28df3166-8a6d-41ba-afa7-4161d7318266";
-            DateTime timestamp = new DateTime();
+            DateTime timestamp =DateTime.Now;
             string data = JsonConvert.SerializeObject(dataList);
 
             using (SqlConnection conn = new SqlConnection(connString))
@@ -77,6 +155,9 @@ namespace IrrigationWorker.Services
                     System.Data.SqlClient.SqlParameter Timestamp = new System.Data.SqlClient.SqlParameter("Timestamp", timestamp.ToString());
                     cmd.Parameters.Add(Timestamp);
 
+                    System.Data.SqlClient.SqlParameter Average = new System.Data.SqlClient.SqlParameter("Average", average);
+                    cmd.Parameters.Add(Average);
+
                     System.Data.SqlClient.SqlParameter Data = new System.Data.SqlClient.SqlParameter("Data", data);
                     cmd.Parameters.Add(Data);
 
@@ -89,6 +170,13 @@ namespace IrrigationWorker.Services
             }
         }
 
+        public class AreaModel
+        {
+            public string Id { get; set; }
+            public string UserId { get; set; }
+            public string Name { get; set; }
+        }
+
         public class SensorModel
         {
             public string Id { get; set; }
@@ -96,6 +184,7 @@ namespace IrrigationWorker.Services
             public double Lat { get; set; }
             public double Lng { get; set; }
             public bool IsActive { get; set; }
+            public int Value { get; set; }
         }
 
         public void SaveWeatherInfo(string info)

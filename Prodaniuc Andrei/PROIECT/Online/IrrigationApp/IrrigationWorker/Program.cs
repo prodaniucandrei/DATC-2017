@@ -17,19 +17,12 @@ namespace IrrigationWorker
         private static DAL _dal;
         static void Main(string[] args)
         {
-            _service = new GeoService();
-            _dal = new DAL();
+            WeatherComputation.CreateProjection("28df3166-8a6d-41ba-afa7-4161d7318266");
+            WeatherComputation.UpdateSensorValue("28df3166-8a6d-41ba-afa7-4161d7318266");
 
-            var result = _dal.GetSensorsForArea().Result;
-
-            List<LatLng> data = new List<LatLng>();
-            foreach(SensorModel sensor in result)
-            {
-                var val = new LatLng() { Latitude = sensor.Lat, Longitude = sensor.Lng};
-                data.Add(val);
-            }
-            _dal.AddData(data);
-            //DoWork();
+            var worker = new Worker();
+            //worker.Init();
+            worker.Process();
         }
 
         private static void DoWork()
